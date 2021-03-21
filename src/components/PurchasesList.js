@@ -9,6 +9,7 @@ import {
   TopToolbar,
   Button,
   useGetMany,
+  useRefresh,
 } from "react-admin";
 import SendIcon from "@material-ui/icons/Send";
 
@@ -21,6 +22,7 @@ const ListActions = () => {
   }, [redirect]);
   const { selectedIds } = useListContext();
   const { data, loading, error } = useGetMany("purchases", selectedIds);
+  const refreshPage = useRefresh();
 
   const authShipping = () => {
     if (
@@ -40,11 +42,10 @@ const ListActions = () => {
               fetch(process.env.REACT_APP_API_URL + "/createitem", {
                 method: "POST",
                 headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-
                   PaymentType: "Cash",
                   AccountRef: {
                     name: it.id.toString(),
@@ -64,6 +65,8 @@ const ListActions = () => {
                     },
                   ],
                 }),
+              }).then(() => {
+                refreshPage();
               });
             });
           } else {

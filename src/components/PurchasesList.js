@@ -44,9 +44,11 @@ const ListActions = () => {
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+
                   PaymentType: "Cash",
                   AccountRef: {
-                    value: it.id.toString(),
+                    name: it.id.toString(),
+                    value: "42",
                   },
                   Line: [
                     {

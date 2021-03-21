@@ -39,6 +39,10 @@ const ListActions = () => {
               console.log(it);
               fetch(process.env.REACT_APP_API_URL + "/createitem", {
                 method: "POST",
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
                   PaymentType: "Cash",
                   AccountRef: {

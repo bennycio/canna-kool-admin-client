@@ -39,7 +39,7 @@ const ListActions = () => {
               console.log(it);
               fetch(process.env.REACT_APP_API_URL + "/createitem", {
                 method: "POST",
-                mode: "cors",
+                mode: "no-cors",
                 headers: {
                   "Content-Type": "application/json",
                 },

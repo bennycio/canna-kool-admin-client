@@ -44,6 +44,7 @@ const ListActions = () => {
                   'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                  purchaseId: it.id,
                   PaymentType: "Cash",
                   AccountRef: {
                     value: "42",

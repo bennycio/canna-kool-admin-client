@@ -54,7 +54,7 @@ const ListActions = () => {
                       Amount: 10.0,
                       AccountBasedExpenseLineDetail: {
                         AccountRef: {
-                          name: "Canna-Kool",
+                          name: it.id.toString(),
                           value: "42",
                         },
                       },

@@ -12,7 +12,7 @@ exports.handler = async function (event, context) {
   const paymentsApi = squareClient.paymentsApi;
   let { result } = await paymentsApi.listPayments();
   let finalResult = [];
-  let handledPurchases = getHandledPurchases();
+  let handledPurchases = await getHandledPurchases();
   result.payments.forEach((it) => {
     if (!handledPurchases.includes(it.id) && it.shippingAddress) {
       finalResult.push({
@@ -42,8 +42,7 @@ function getShippingAddressOrNone(shippingAddress) {
   return [line1, line2, city, state, zip].filter(Boolean).join(" ");
 }
 
-function getHandledPurchases() {
-  console.log(process.env.DB_URL);
+async function getHandledPurchases() {
   const mongoClient = new MongoClient(process.env.DB_URL, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
@@ -51,11 +50,11 @@ function getHandledPurchases() {
   mongoClient.connect();
   const db = mongoClient.db("canna-kool");
   const collection = db.collection("handled-purchases");
-  const cursor = collection.find({});
+  const cursor = await collection.find({});
   let handledPurchases = [];
-  cursor.forEach((it) => {
+  await cursor.forEach((it) => {
     handledPurchases.push(it.purchaseId);
   });
-  mongoClient.close();
-  return handledPurchases;
+  await mongoClient.close();
+  return await handledPurchases;
 }

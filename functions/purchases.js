@@ -58,7 +58,6 @@ async function getHandledPurchases() {
   let handledPurchases = [];
   await cursor.forEach((it) => {
     handledPurchases.push(it.purchaseId);
-    console.log(it.purchaseId);
   });
   await mongoClient.close();
   return handledPurchases;

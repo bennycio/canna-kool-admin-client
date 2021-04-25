@@ -1,4 +1,6 @@
 const square = require("square");
+const mongodb = require("mongodb");
+const MongoClient = mongodb.MongoClient;
 const Client = square.Client;
 const Environment = square.Environment;
 
@@ -39,4 +41,21 @@ function getShippingAddressOrNone(shippingAddress) {
   let state = shippingAddress.administrativeDistrictLevel1 || "CA";
   let zip = shippingAddress.postalCode;
   return [line1, line2, city, state, zip].filter(Boolean).join(" ");
+}
+
+async function getHandledPurchases() {
+  const mongoClient = new MongoClient(url, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+  });
+  await mongoClient.connect();
+  const db = mongoClient.db("canna-kool");
+  const collection = db.collection("handled-purchases");
+  const cursor = await collection.find({});
+  let handledPurchases = [];
+  await cursor.forEach((it) => {
+    handledPurchases.push(it.purchaseId);
+  });
+  await mongoClient.close();
+  return await handledPurchases;
 }

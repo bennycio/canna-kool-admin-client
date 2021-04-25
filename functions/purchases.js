@@ -1,6 +1,5 @@
 const square = require("square");
-const mongodb = require("mongodb");
-const MongoClient = mongodb.MongoClient;
+const { MongoClient } = require("mongodb");
 const Client = square.Client;
 const Environment = square.Environment;
 
@@ -13,7 +12,7 @@ exports.handler = async function (event, context) {
   const paymentsApi = squareClient.paymentsApi;
   let { result } = await paymentsApi.listPayments();
   let finalResult = [];
-  let handledPurchases = await getHandledPurchases();
+  let handledPurchases = getHandledPurchases();
   result.payments.forEach((it) => {
     if (!handledPurchases.includes(it.id) && it.shippingAddress) {
       finalResult.push({
@@ -43,19 +42,20 @@ function getShippingAddressOrNone(shippingAddress) {
   return [line1, line2, city, state, zip].filter(Boolean).join(" ");
 }
 
-async function getHandledPurchases() {
+function getHandledPurchases() {
+  console.log(process.env.DB_URL);
   const mongoClient = new MongoClient(process.env.DB_URL, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
   });
-  await mongoClient.connect();
+  mongoClient.connect();
   const db = mongoClient.db("canna-kool");
   const collection = db.collection("handled-purchases");
-  const cursor = await collection.find({});
+  const cursor = collection.find({});
   let handledPurchases = [];
-  await cursor.forEach((it) => {
+  cursor.forEach((it) => {
     handledPurchases.push(it.purchaseId);
   });
-  await mongoClient.close();
-  return await handledPurchases;
+  mongoClient.close();
+  return handledPurchases;
 }

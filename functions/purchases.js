@@ -44,7 +44,7 @@ function getShippingAddressOrNone(shippingAddress) {
 }
 
 async function getHandledPurchases() {
-  const mongoClient = new MongoClient(url, {
+  const mongoClient = new MongoClient(process.env.DB_URL, {
     useUnifiedTopology: true,
     useNewUrlParser: true,
   });

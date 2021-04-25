@@ -1,5 +1,6 @@
 const square = require("square");
-const { MongoClient } = require("mongodb");
+const mongodb = require("mongodb");
+const MongoClient = mongodb.MongoClient;
 const Client = square.Client;
 const Environment = square.Environment;
 
@@ -29,7 +30,7 @@ exports.handler = async function (event, context) {
     headers: {
       "X-Total-Count": total,
     },
-    body: finalResult,
+    body: JSON.stringify(finalResult),
   };
 };
 
@@ -43,18 +44,22 @@ function getShippingAddressOrNone(shippingAddress) {
 }
 
 async function getHandledPurchases() {
-  const mongoClient = new MongoClient(process.env.DB_URL, {
-    useUnifiedTopology: true,
+  const pass = process.env.MG_PASS;
+
+  const uri = `mongodb+srv://canna-kool-user:${pass}@commerce-cluster.ush0w.mongodb.net/canna-kool?retryWrites=true&w=majority`;
+  const mongoClient = new MongoClient(uri, {
     useNewUrlParser: true,
+    useUnifiedTopology: true,
   });
-  mongoClient.connect();
+  await mongoClient.connect();
   const db = mongoClient.db("canna-kool");
   const collection = db.collection("handled-purchases");
-  const cursor = await collection.find({});
+  const cursor = collection.find({});
   let handledPurchases = [];
   await cursor.forEach((it) => {
     handledPurchases.push(it.purchaseId);
+    console.log(it.purchaseId);
   });
   await mongoClient.close();
-  return await handledPurchases;
+  return handledPurchases;
 }

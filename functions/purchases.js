@@ -34,11 +34,10 @@ exports.handler = async function (event, context) {
       });
     }
   });
-  finalResult.total = finalResult.data.length;
 
   return {
     headers: {
-      "X-Total-Count": finalResult.total,
+      "X-Total-Count": finalResult.length,
     },
     status: 200,
     body: JSON.stringify(finalResult),

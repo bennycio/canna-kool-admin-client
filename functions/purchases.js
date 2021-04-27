@@ -22,14 +22,11 @@ exports.handler = async function (event, context) {
   const listPaymentsResponse = await paymentsApi.listPayments();
   const result = listPaymentsResponse.result;
   payments = result.payments;
-  var finalResult = {
-    data: [],
-    total: 0,
-  };
+  var finalResult = [];
   var handledPurchases = await getHandledPurchases();
   payments.forEach((it) => {
     if (!handledPurchases.includes(it.id) && it.shippingAddress) {
-      finalResult.data.push({
+      finalResult.push({
         id: it.id,
         date: it.createdAt,
         Price: Number(it.amountMoney.amount) / 100,

@@ -10,37 +10,11 @@ exports.handler = async function (event, context) {
     accessToken: process.env.SQUARE_ACCESS_TOKEN,
   });
 
-  const end = event.queryStringParameters._end;
-  const start = event.queryStringParameters._start;
-
-  const total = end - start;
-  const page = (start % 10) + 1;
-  console.log(total);
-  console.log(page);
-
-  const paymentsApi = squareClient.paymentsApi;
+  const { paymentsApi } = squareClient;
 
   var payments = [];
-
-  const listPaymentsFunction = parameterfy(paymentsApi.listPayments);
-
-  const { cursor, result } = await listPaymentsFunction({
-    limit: total,
-  });
-  let currentCursor = cursor;
-  if (page > 1) {
-    var i;
-    for (i = 0; i < page; i++) {
-      const { cursor, result } = await listPaymentsFunction({
-        limit: total,
-        cursor: currentCursor,
-      });
-      currentCursor = cursor;
-      payments = result.payments;
-    }
-  } else {
-    payments = result.payments;
-  }
+  const { result } = await paymentsApi.listPayments();
+  payments.push(result.payments);
   let finalResult = [];
   let handledPurchases = await getHandledPurchases();
   payments.forEach((it) => {
@@ -56,7 +30,7 @@ exports.handler = async function (event, context) {
 
   return {
     headers: {
-      "X-Total-Count": total,
+      "X-Total-Count": payments.length,
     },
     status: 200,
     body: JSON.stringify(finalResult),
@@ -90,27 +64,4 @@ async function getHandledPurchases() {
   });
   await mongoClient.close();
   return handledPurchases;
-}
-
-async function parameterfy() {
-  var pattern = "/function[^(]*(([^)]*))/";
-
-  return function (func) {
-    // fails horribly for parameterless functions ;)
-    var args = func.toString().match(pattern)[1].split(/,\s*/);
-
-    return function () {
-      var named_params = arguments[arguments.length - 1];
-      if (typeof named_params === "object") {
-        var params = [].slice.call(arguments, 0, -1);
-        if (params.length < args.length) {
-          for (var i = params.length, l = args.length; i < l; i++) {
-            params.push(named_params[args[i]]);
-          }
-          return func.apply(this, params);
-        }
-      }
-      return func.apply(null, arguments);
-    };
-  };
 }

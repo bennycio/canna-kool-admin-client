@@ -9,6 +9,8 @@ exports.handler = async function (event, context) {
   const result = await addHandledPurchases(asJson.ids);
 
   console.log(result);
+
+  return { status: 200 };
 };
 
 async function addHandledPurchases(ids) {

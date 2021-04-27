@@ -10,11 +10,35 @@ exports.handler = async function (event, context) {
     accessToken: process.env.SQUARE_ACCESS_TOKEN,
   });
 
+  const end = event.queryStringParameters._end;
+  const start = event.queryStringParameters._start;
+
+  const total = end - start;
+  const page = (start % 10) + 1;
+  console.log(total);
+  console.log(page);
+
   const paymentsApi = squareClient.paymentsApi;
-  let { result } = await paymentsApi.listPayments();
+
+  var payments = [];
+  const { cursor, result } = await paymentsApi.listPayments({ limit: total });
+  let currentCursor = cursor;
+  if (page > 1) {
+    var i;
+    for (i = 0; i < page; i++) {
+      const { cursor, result } = await paymentsApi.listPayments({
+        limit: total,
+        cursor: currentCursor,
+      });
+      currentCursor = cursor;
+      payments = result.payments;
+    }
+  } else {
+    payments = result.payments;
+  }
   let finalResult = [];
   let handledPurchases = await getHandledPurchases();
-  result.payments.forEach((it) => {
+  payments.forEach((it) => {
     if (!handledPurchases.includes(it.id) && it.shippingAddress) {
       finalResult.push({
         id: it.id,
@@ -24,12 +48,12 @@ exports.handler = async function (event, context) {
       });
     }
   });
-  let total = finalResult.length;
 
   return {
     headers: {
       "X-Total-Count": total,
     },
+    status: 200,
     body: JSON.stringify(finalResult),
   };
 };

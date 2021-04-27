@@ -40,6 +40,9 @@ exports.handler = async function (event, context) {
   finalResult.total = finalResult.data.length;
 
   return {
+    headers: {
+      "X-Total-Count": finalResult.total,
+    },
     status: 200,
     body: JSON.stringify(finalResult),
   };

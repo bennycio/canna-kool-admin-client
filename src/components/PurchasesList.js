@@ -24,7 +24,7 @@ const ListActions = () => {
   const { data, loading, error } = useGetMany("purchases", selectedIds);
   const refreshPage = useRefresh();
 
-  const authShipping = () => {
+  const authShipping = async () => {
     if (
       window.confirm(
         "Are you sure you want to send off " +
@@ -32,58 +32,25 @@ const ListActions = () => {
           " purchases for shipment?"
       )
     ) {
-      fetch(process.env.REACT_APP_API_URL + "/isauth")
-        .then((response) => response.json())
-        .then((json) => {
-          var value = json.isAuth;
-          if (value) {
-            data.forEach((it) => {
-              console.log(it);
-              fetch(process.env.REACT_APP_API_URL + "/createitem", {
-                method: "POST",
-                headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  PaymentType: "Cash",
-                  AccountRef: {
-                    name: it.id.toString(),
-                    value: "42",
-                  },
-                  Line: [
-                    {
-                      DetailType: "AccountBasedExpenseLineDetail",
-                      Amount: 10.0,
-                      AccountBasedExpenseLineDetail: {
-                        AccountRef: {
-                          name: it.id.toString(),
-                          value: "42",
-                        },
-                      },
-                      Description: it.Address,
-                    },
-                  ],
-                }),
-              }).then(() => {
-                refreshPage();
-              });
-            });
-          } else {
-            fetch(process.env.REACT_APP_API_URL + "/qbauth")
-              .then((response) => response.json())
-              .then((json) => {
-                setRedirect(json.url);
-                setRedirect(null);
-              });
-          }
-        });
+      const url = process.env.REACT_APP_API_URL + "/completePurchase";
+      const data = {
+        ids: [...selectedIds],
+      };
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data), // body data type must match "Content-Type" header
+      });
+      if (response.ok) alert("success");
+      else alert("fail");
     }
   };
 
   return (
     <TopToolbar>
-      <Button onClick={() => authShipping()} label="Authorize Shipment">
+      <Button onClick={authShipping} label="Authorize Shipment">
         <SendIcon />
       </Button>
     </TopToolbar>

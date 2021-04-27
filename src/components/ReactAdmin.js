@@ -3,16 +3,6 @@ import { Admin, ListGuesser, Resource } from "react-admin";
 import jsonServerProvider from "ra-data-json-server";
 import PurchaseList from "./PurchasesList";
 
-const dataProvider = jsonServerProvider(process.env.REACT_APP_API_URL);
-
-const ReactAdmin = () => {
-  return (
-    <Admin dataProvider={dataProvider}>
-      <Resource name="purchases" getList={getList} list={PurchaseList} />
-    </Admin>
-  );
-};
-
 const getList = async (resource, params) => {
   const { page, perPage } = params.pagination;
   const { q } = params.filter;
@@ -41,4 +31,16 @@ const getList = async (resource, params) => {
   const response = fetch(url);
   return await response.body.json();
 };
+
+const dataProvider = jsonServerProvider(process.env.REACT_APP_API_URL);
+dataProvider.getList = getList;
+
+const ReactAdmin = () => {
+  return (
+    <Admin dataProvider={dataProvider}>
+      <Resource name="purchases" list={PurchaseList} />
+    </Admin>
+  );
+};
+
 export default ReactAdmin;

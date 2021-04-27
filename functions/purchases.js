@@ -31,7 +31,7 @@ exports.handler = async function (event, context) {
 
   return {
     headers: {
-      "X-Total-Count": payments.length,
+      "X-Total-Count": finalResult.length,
     },
     status: 200,
     body: JSON.stringify(finalResult),

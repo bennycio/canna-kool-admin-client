@@ -32,7 +32,7 @@ const ListActions = () => {
           " purchases for shipment?"
       )
     ) {
-      const url = process.env.REACT_APP_API_URL + "/completePurchase";
+      const url = process.env.REACT_APP_API_URL + "/authshipping";
       const data = {
         ids: [...selectedIds],
       };

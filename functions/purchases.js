@@ -19,9 +19,38 @@ exports.handler = async function (event, context) {
   var paymentsApi = squareClient.paymentsApi;
 
   var payments = [];
-  const listPaymentsResponse = await paymentsApi.listPayments();
-  const result = listPaymentsResponse.result;
-  payments = result.payments;
+  const { result, cursor } = await paymentsApi.listPayments(
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    limit
+  );
+  let currentResult = result;
+  let currentCursor = cursor;
+
+  var i;
+  for (i = 0; i < page; i++) {
+    const { result, cursor } = await paymentsApi.listPayments(
+      undefined,
+      undefined,
+      undefined,
+      currentCursor,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      limit
+    );
+    currentCursor = cursor;
+    currentResult = result;
+  }
+
+  payments = currentResult.payments;
   var finalResult = [];
   var handledPurchases = await getHandledPurchases();
   payments.forEach((it) => {
@@ -36,9 +65,6 @@ exports.handler = async function (event, context) {
   });
 
   return {
-    headers: {
-      "X-Total-Count": finalResult.length,
-    },
     status: 200,
     body: JSON.stringify(finalResult),
   };

@@ -10,13 +10,14 @@ exports.handler = async function (event, context) {
     accessToken: process.env.SQUARE_ACCESS_TOKEN,
   });
 
-  const { paymentsApi } = squareClient;
+  var paymentsApi = squareClient.paymentsApi;
 
   var payments = [];
-  const { result } = await paymentsApi.listPayments();
-  payments.push(result.payments);
-  let finalResult = [];
-  let handledPurchases = await getHandledPurchases();
+  const listPaymentsResponse = await paymentsApi.listPayments();
+  const result = listPaymentsResponse.result;
+  payments = result.payments;
+  var finalResult = [];
+  var handledPurchases = await getHandledPurchases();
   payments.forEach((it) => {
     if (!handledPurchases.includes(it.id) && it.shippingAddress) {
       finalResult.push({
@@ -38,18 +39,18 @@ exports.handler = async function (event, context) {
 };
 
 function getShippingAddressOrNone(shippingAddress) {
-  let line1 = shippingAddress.addressLine1;
-  let line2 = shippingAddress.addressLine2;
-  let city = shippingAddress.locality;
-  let state = shippingAddress.administrativeDistrictLevel1 || "CA";
-  let zip = shippingAddress.postalCode;
+  var line1 = shippingAddress.addressLine1;
+  var line2 = shippingAddress.addressLine2;
+  var city = shippingAddress.locality;
+  var state = shippingAddress.administrativeDistrictLevel1 || "CA";
+  var zip = shippingAddress.postalCode;
   return [line1, line2, city, state, zip].filter(Boolean).join(" ");
 }
 
 async function getHandledPurchases() {
-  const pass = process.env.MG_PASS;
+  var pass = process.env.MG_PASS;
 
-  const uri = `mongodb+srv://canna-kool-user:${pass}@commerce-cluster.ush0w.mongodb.net/canna-kool?retryWrites=true&w=majority`;
+  var uri = `mongodb+srv://canna-kool-user:${pass}@commerce-cluster.ush0w.mongodb.net/canna-kool?retryWrites=true&w=majority`;
   const mongoClient = new MongoClient(uri, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -58,7 +59,7 @@ async function getHandledPurchases() {
   const db = mongoClient.db("canna-kool");
   const collection = db.collection("handled-purchases");
   const cursor = collection.find({});
-  let handledPurchases = [];
+  var handledPurchases = [];
   await cursor.forEach((it) => {
     handledPurchases.push(it.purchaseId);
   });

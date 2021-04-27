@@ -10,17 +10,26 @@ exports.handler = async function (event, context) {
     accessToken: process.env.SQUARE_ACCESS_TOKEN,
   });
 
+  const limit = event.queryStringParameters.limit;
+  const page = event.queryStringParameters.page;
+
+  console.log(limit);
+  console.log(page);
+
   var paymentsApi = squareClient.paymentsApi;
 
   var payments = [];
   const listPaymentsResponse = await paymentsApi.listPayments();
   const result = listPaymentsResponse.result;
   payments = result.payments;
-  var finalResult = [];
+  var finalResult = {
+    data: [],
+    total: 0,
+  };
   var handledPurchases = await getHandledPurchases();
   payments.forEach((it) => {
     if (!handledPurchases.includes(it.id) && it.shippingAddress) {
-      finalResult.push({
+      finalResult.data.push({
         id: it.id,
         date: it.createdAt,
         Price: Number(it.amountMoney.amount) / 100,
@@ -28,11 +37,9 @@ exports.handler = async function (event, context) {
       });
     }
   });
+  finalResult.total = finalResult.data.length;
 
   return {
-    headers: {
-      "X-Total-Count": finalResult.length,
-    },
     status: 200,
     body: JSON.stringify(finalResult),
   };

@@ -28,7 +28,7 @@ const getList = async (resource, params) => {
 
   const url = `${apiUrl}/${useResource}?${query}`;
 
-  const response = fetch(url);
+  const response = await fetch(url);
   return await response.body.json();
 };
 

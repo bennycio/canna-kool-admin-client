@@ -1,13 +1,19 @@
-import { BrowserRouter, Switch, Route } from "react-router-dom";
+import { Box, Grommet, Header, Heading, Main } from "grommet"
+import PurchasesList from "./components/PurchasesList"
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Switch>
-        <Route exact path="/" />
-      </Switch>
-    </BrowserRouter>
-  );
-};
+    <Grommet>
+      <Box align="center">
+        <Header>
+          <Heading>Purchases</Heading>
+        </Header>
+        <Main>
+          <PurchasesList />
+        </Main>
+      </Box>
+    </Grommet>
+  )
+}
 
-export default App;
+export default App
